@@ -4,8 +4,8 @@ use grep_knockoff::Config;
 
 
 fn main() {
-    let args: Vec<String> = env::args().collect(); // Get the command line arguments and store them in a vector called `args`
-    let config = match Config::new(&args) {
+    // Get the command line arguments and store them in a vector called `args`
+    let config = match Config::new(env::args()) {
         Ok(config) => config,
         Err(err) => {
             eprintln!("Problem parsing arguments: {}", err);
@@ -18,4 +18,5 @@ fn main() {
         eprintln!("Application error: {}", err);
         process::exit(1);
     }
+    
 }

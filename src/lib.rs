@@ -8,16 +8,20 @@ pub struct Config {
 }
 impl Config {
     // Define a new function called `new` that takes a reference to a slice of Strings called `args` and returns a Config object
-    pub fn new(args: &[String]) -> Result<Config, &'static str> {
+    pub fn new(mut args: std::env::Args) -> Result<Config, &'static str> {
         // Create a new Config object using the values from the `args` slice
-        if args.len() < 3 {
-            return Err("Not enough arguments");
-        }
+        args.next();
         Ok(Config {
             // Set the `query` field of the Config object to be a clone of the second element in the `args` slice
-            query: args[1].clone(),
+            query: match args.next() {
+                Some(arg) => arg,
+                None => return Err("Didn't get a query string"),
+            },
             // Set the `filename` field of the Config object to be a clone of the third element in the `args` slice
-            filename: args[2].clone(),
+            filename: match args.next() {
+                Some(arg) => arg,
+                None => return Err("Didn't get a file name"),
+            },
             case_sensitive: env::var("CASE_INSENSITIVE").is_err(),
         })
     }
@@ -37,13 +41,9 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
-    let mut results = Vec::new();
-    for line in contents.lines() {
-        if line.contains(query) {
-            results.push(line);
-        }
-    }
-    results
+    contents.lines()
+    .filter(|line| line.contains(query))
+    .collect()
 }
 pub fn search_case_insensitive<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
     let query = query.to_lowercase();
